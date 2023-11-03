@@ -7,10 +7,10 @@ import { fileURLToPath } from "url";
 import OpenAI from "openai";
 import { ChatUser, ChatMessage } from "./schema.js";
 import mongooseConnection from "./db.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-//OpenAPI API Key = "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"
-//OpenAI API Key Atul = "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"
-const openAIAPIKey = "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";
+const openAIAPIKey = process.env.OPENAI_API_KEY;
 
 const app = express();
 
@@ -38,18 +38,15 @@ app.post("/openai-interact", async (req, res) => {
     const { message } = req.body;
     const userIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    // Make a call to the OpenAI API
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "system", content: message }],
     });
 
-    // Extract the generated text from the response
     const generatedText = response.choices[0];
     console.log(generatedText);
     const user = await ChatUser.findOne({ userIP }).exec();
     if (user) {
-      // User exists, add the new message to their chat history
       const newUserMessage = new ChatMessage({ message: "User: " + message });
       const newAssistantMessage = new ChatMessage({
         message: "Assistant: " + generatedText.message.content,
@@ -58,7 +55,6 @@ app.post("/openai-interact", async (req, res) => {
       user.chatHistory.push(newAssistantMessage);
       await user.save();
     } else {
-      // User doesn't exist, create a new user with the chat history
       const newUser = new ChatUser({
         userIP,
         chatHistory: [
@@ -69,7 +65,6 @@ app.post("/openai-interact", async (req, res) => {
       await newUser.save();
     }
 
-    // Send the generated text as the response
     res.json({ text: generatedText });
   } catch (error) {
     console.error("Error interacting with OpenAI:", error);
@@ -77,14 +72,13 @@ app.post("/openai-interact", async (req, res) => {
   }
 });
 
-// Example route to retrieve chat history for a user
 app.get("/chat-history", async (req, res) => {
   const { userIP } = req.query;
 
   try {
     const user = await ChatUser.findOne({ userIP }).exec();
     if (user) {
-      const chatHistory = user.chatHistory; // This is the user's chat history
+      const chatHistory = user.chatHistory;
       res.json(chatHistory);
     } else {
       res.json([]);
