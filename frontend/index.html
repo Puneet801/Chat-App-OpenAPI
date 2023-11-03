@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real-Time Chat</title>
+  <style>
+    #chat-box {
+      width: 300px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #message-list {
+      list-style: none;
+      padding: 0;
+    }
+    #message-list li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-box">
+    <h1>Real-Time Chat</h1>
+    <ul id="message-list"></ul>
+    <input type="text" id="message" placeholder="Type your message" />
+    <button id = "sendButton">Send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="socket-client.js"></script>
+  
+</body>
+</html>
